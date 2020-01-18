@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 long long n, k;
 long long func(long long a)

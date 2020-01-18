@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <string.h>
 #include <stdio.h>
 int max(int a, int b)

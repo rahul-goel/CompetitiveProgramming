@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 /*Editorial - 
 There exists some i, such that (ai+x)modm=b1. Let's enumerate it, then x is (b1−ai)modm.
 Like that you can get O(n) candidates, each of them can be checked in O(nlogn) with sort 

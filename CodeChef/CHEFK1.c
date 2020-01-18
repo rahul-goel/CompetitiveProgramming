@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 #include <math.h>
 long long int comb(long long int a, long long int b);

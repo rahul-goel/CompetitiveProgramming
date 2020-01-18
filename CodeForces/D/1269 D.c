@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 /*
 method seen from editorial. black and white method
 assuming bottommost cell of the first column to be white.

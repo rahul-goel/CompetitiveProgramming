@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 long long algae(long long year);
 long long d, r;

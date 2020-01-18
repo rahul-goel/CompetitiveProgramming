@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 int shapes(int n);
 int arr[100];

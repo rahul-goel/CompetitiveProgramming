@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 
 int gcd(int a, int b)

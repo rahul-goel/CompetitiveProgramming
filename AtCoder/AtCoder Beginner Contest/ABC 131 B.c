@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 #include <math.h>
 int min(int a, int b);

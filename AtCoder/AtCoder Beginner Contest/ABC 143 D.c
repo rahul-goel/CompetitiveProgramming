@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 #include <stdlib.h>
 int comparetor (const void * a, const void * b)

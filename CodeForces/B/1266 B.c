@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 /*
 solve equation. sum of no. on dice = 21. let k+1 dices.

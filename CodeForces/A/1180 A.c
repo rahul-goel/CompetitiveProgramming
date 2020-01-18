@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 int rhombus(int n);
 int arr[200] = {0};

@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 int sumofdig(int n);
 int main()

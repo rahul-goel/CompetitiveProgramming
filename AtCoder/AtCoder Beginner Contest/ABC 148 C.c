@@ -1,3 +1,4 @@
+//Created by Rahul Goel
 #include <stdio.h>
 typedef long long ll;
 ll gcd(ll a, ll b)
