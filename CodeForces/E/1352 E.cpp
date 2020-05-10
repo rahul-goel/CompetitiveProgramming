@@ -48,29 +48,28 @@ template<typename T, typename... Args>
 T mod_product(T a, Args... args) { return (a*mod_product(args...))%mod; }
 
 // --------------------------------------------------------------
+vi vec, pre, freq, vis;
 
 ll solve(){
     ll n;
     cin >> n;
-    vi vec(n+1), pre(n+1, 0), ans, freq(n+1, 0);
-    set < ll > setter;
+    vec.clear(), pre.clear(), freq.clear(), vis.clear();
+    vec.resize(n+1), pre.resize(n+1), freq.resize(n+1), vis.resize(n+1);
+    ll mn = LINF, mx = 0;
     for(ll i=1; i<=n; i++)
-        cin >> vec[i], setter.insert(vec[i]), freq[vec[i]]++;
+        cin >> vec[i], freq[vec[i]]++, mx = max(mx, vec[i]), mn = min(mn, vec[i]);
     for(ll i=1; i<=n; i++)
         pre[i] = pre[i-1] + vec[i];
-    
+
+
+    ll cnt = 0;
     for(ll i=0; i<n; i++){
         for(ll j = i+2; j<=n; j++){
-            if(present(setter, pre[j] - pre[i]))
-                ans.pb(pre[j] - pre[i]);
+            ll x = pre[j] - pre[i];
+            if(x >= mn && x <= mx && freq[x] > 0)
+                cnt += freq[x], freq[x] = 0;    
         }
     }
-    
-    sort(all(ans));
-    ans.resize(distance(ans.begin(), unique(all(ans))));
-    ll cnt = 0;
-    for(ll x : ans)
-        cnt += freq[x];
     cout << cnt << endl;
     return 0;
 }
@@ -85,4 +84,5 @@ int main(){
 
     return 0;
 }
+
 
