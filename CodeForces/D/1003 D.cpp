@@ -66,121 +66,45 @@ T mod_prod(T a, Args... args) { return (a*mod_prod(args...))%mod; }
     Code begins after this.
 */
 
-vvi adj;
-vb vis;
-vi side;
-vpii divisions;
-vvi backtrack[2];
-
-void add_edge(ll u, ll v){
-    adj[u].pb(v);
-    adj[v].pb(u);
-}
-
-bool bipartite_check(){
-    ll n = adj.size();
-    queue < ll > q;
-    for(ll i=0; i<n; i++){
-        if(side[i] == -1){
-            backtrack[0].pb(vi());
-            backtrack[1].pb(vi());
-            q.push(i);
-            side[i] = 0;
-            while(!q.empty()){
-                ll v = q.front();
-                backtrack[side[v]].back().pb(v);
-                q.pop();
-                for(ll u : adj[v]){
-                    if(side[u] == -1){
-                        side[u] = side[v] ^ 1;
-                        q.push(u);
-                    }
-                    else if ((side[u] ^ side[v]) == 0)
-                        return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-pii dfs(ll v){
-    vis[v] = true;
-    ll p0 = 0, p1 = 0;
-    if(side[v] == 0)
-        p0++;
-    else
-        p1++;
-    for(ll u : adj[v]){
-        if(!vis[u]){
-            pii x = dfs(u);
-            p0 += x.ff, p1 += x.ss;
-        }
-    }
-    return {p0, p1};
-}
+vi cnt(35, 0);
 
 ll solve(){
-    backtrack[0].clear(), backtrack[1].clear();
-    ll n, m, n1, n2, n3;
-    cin >> n >> m >> n1 >> n2 >> n3;
-    adj.resize(n), vis.resize(n, false), side.resize(n, -1);
-    for(ll i=0; i<m; i++){
-        ll u, v;
-        cin >> u >> v;
-        u--, v--;
-        add_edge(u, v);
+    ll n, q;
+    cin >> n >> q;
+
+    for(ll i=0; i<n; i++){
+        ll x;
+        cin >> x;
+        cnt[log2(x)]++;
     }
 
-    if(!bipartite_check()){
-        cout << "NO" << endl;
-        return 0;
-    }
-    
-    for(ll i=0; i<n; i++){
-        if(!vis[i])
-            divisions.pb(dfs(i));
-    }
-    
-    vvi dp(divisions.size()+5, vi(n+5, -1));
-    dp[0][0] = 0;
-    for(ll i=0; i<divisions.size(); i++){
-        for(ll j=0; j<n; j++){
-            if(dp[i][j] != -1){
-                dp[i+1][j+divisions[i].ff] = 0;
-                dp[i+1][j+divisions[i].ss] = 1;
+    while(q--){
+        ll a;
+        cin >> a;
+        vi po(35, 0);
+        for(ll i=0; i<32; i++){
+            if(a&1)
+                po[i]++;
+            a>>=1;
+            if(!a)
+                break;
+        }
+        ll ans = 0;
+        for(ll i=32; i>0; i--){
+            if(po[i]){
+                if(cnt[i] >= po[i])
+                    ans += po[i];
+                else
+                    ans += cnt[i], po[i-1] += (po[i]-cnt[i])*2;
             }
         }
-    }
-
-    if(dp[divisions.size()][n2] == -1){
-        cout << "NO" << endl;
-        return 0;
-    }
-
-    cout << "YES" << endl;
-
-    vi ans(n+5);
-    ll cur = n2;
-    for(ll i=divisions.size(); i>0; i--){
-        for(auto it : backtrack[dp[i][cur]][i-1])
-            ans[it] = 2;
-        cur -= backtrack[dp[i][cur]][i-1].size();
-        if(cur == 0)
-            break;
-    }
-    for(ll i=0; i<n; i++){
-        if(ans[i] != 2){
-            if(n1>0)
-                ans[i] = 1, n1--;
-            else
-                ans[i] = 3;
+        if(cnt[0] >= po[0]){
+            cout << ans + po[0] << endl;
+        }
+        else{
+            cout << -1 << endl;
         }
     }
-
-    for(ll i=0; i<n; i++)
-        cout << ans[i];
-    cout << endl;
 
     return 0;
 }

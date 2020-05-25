@@ -66,122 +66,100 @@ T mod_prod(T a, Args... args) { return (a*mod_prod(args...))%mod; }
     Code begins after this.
 */
 
-vvi adj;
-vb vis;
-vi side;
-vpii divisions;
-vvi backtrack[2];
-
-void add_edge(ll u, ll v){
-    adj[u].pb(v);
-    adj[v].pb(u);
-}
-
-bool bipartite_check(){
-    ll n = adj.size();
-    queue < ll > q;
-    for(ll i=0; i<n; i++){
-        if(side[i] == -1){
-            backtrack[0].pb(vi());
-            backtrack[1].pb(vi());
-            q.push(i);
-            side[i] = 0;
-            while(!q.empty()){
-                ll v = q.front();
-                backtrack[side[v]].back().pb(v);
-                q.pop();
-                for(ll u : adj[v]){
-                    if(side[u] == -1){
-                        side[u] = side[v] ^ 1;
-                        q.push(u);
-                    }
-                    else if ((side[u] ^ side[v]) == 0)
-                        return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-pii dfs(ll v){
-    vis[v] = true;
-    ll p0 = 0, p1 = 0;
-    if(side[v] == 0)
-        p0++;
-    else
-        p1++;
-    for(ll u : adj[v]){
-        if(!vis[u]){
-            pii x = dfs(u);
-            p0 += x.ff, p1 += x.ss;
-        }
-    }
-    return {p0, p1};
-}
 
 ll solve(){
-    backtrack[0].clear(), backtrack[1].clear();
-    ll n, m, n1, n2, n3;
-    cin >> n >> m >> n1 >> n2 >> n3;
-    adj.resize(n), vis.resize(n, false), side.resize(n, -1);
-    for(ll i=0; i<m; i++){
-        ll u, v;
-        cin >> u >> v;
-        u--, v--;
-        add_edge(u, v);
-    }
-
-    if(!bipartite_check()){
-        cout << "NO" << endl;
-        return 0;
-    }
-    
+    ll n, m;
+    cin >> n >> m;
+    vvi mat(n, vi(m));
     for(ll i=0; i<n; i++){
-        if(!vis[i])
-            divisions.pb(dfs(i));
-    }
-    
-    vvi dp(divisions.size()+5, vi(n+5, -1));
-    dp[0][0] = 0;
-    for(ll i=0; i<divisions.size(); i++){
-        for(ll j=0; j<n; j++){
-            if(dp[i][j] != -1){
-                dp[i+1][j+divisions[i].ff] = 0;
-                dp[i+1][j+divisions[i].ss] = 1;
-            }
+        for(ll j=0; j<m; j++){
+            char x;
+            cin >> x;
+            mat[i][j] = (ll)x;
         }
     }
 
-    if(dp[divisions.size()][n2] == -1){
-        cout << "NO" << endl;
-        return 0;
-    }
-
-    cout << "YES" << endl;
-
-    vi ans(n+5);
-    ll cur = n2;
-    for(ll i=divisions.size(); i>0; i--){
-        for(auto it : backtrack[dp[i][cur]][i-1])
-            ans[it] = 2;
-        cur -= backtrack[dp[i][cur]][i-1].size();
-        if(cur == 0)
-            break;
-    }
-    for(ll i=0; i<n; i++){
-        if(ans[i] != 2){
-            if(n1>0)
-                ans[i] = 1, n1--;
-            else
-                ans[i] = 3;
-        }
-    }
-
+    vvi math = mat;
+    vvi matv(m, vi(n));
     for(ll i=0; i<n; i++)
-        cout << ans[i];
-    cout << endl;
+        for(ll j=0; j<m; j++)
+            matv[j][i] = mat[i][j];
 
+    for(ll i=0; i<n; i++){
+        sort(all(math[i]));
+        uniq(math[i]);
+    }
+    for(ll i=0; i<m; i++){
+        sort(all(matv[i]));
+        uniq(matv[i]);
+    }
+
+    bool hor = true;
+    for(ll i=0; i<n; i++){
+        if(math[i].size() > 1)
+            hor = false;
+    }
+    
+    if(hor){
+        ll r=0, g=0, b=0;
+        ll ro=0, go=0, bo=0;
+        for(ll i=0; i<n; ){
+            if(math[i][0] == 'R'){
+                ro++;
+                while(i<n && math[i][0] == 'R')
+                    i++, r++;
+            } 
+            else if(math[i][0] == 'G'){
+                go++;
+                while(i<n && math[i][0] == 'G')
+                    i++, g++;
+            } 
+            else if(math[i][0] == 'B'){
+                bo++;
+                while(i<n && math[i][0] == 'B')
+                    i++, b++;
+            } 
+        }
+        if(r==g && g==b && ro==1 && bo==1 && go==1)
+            cout << "YES" << endl;
+        else
+            cout << "NO" << endl;
+        return 0;
+    }
+
+    bool ver = true;
+    for(ll i=0; i<m; i++){
+        if(matv[i].size() > 1)
+            ver = false;
+    }
+
+    if(ver){
+        ll r=0, g=0, b=0;
+        ll ro=0, go=0, bo=0;
+        for(ll i=0; i<m; ){
+            if(matv[i][0] == 'R'){
+                ro++;
+                while(i<m && matv[i][0] == 'R')
+                    i++, r++;
+            } 
+            else if(matv[i][0] == 'G'){
+                go++;
+                while(i<m && matv[i][0] == 'G')
+                    i++, g++;
+            } 
+            else if(matv[i][0] == 'B'){
+                bo++;
+                while(i<m && matv[i][0] == 'B')
+                    i++, b++;
+            } 
+        }
+        if(r==g && g==b && ro==1 && bo==1 && go==1)
+            cout << "YES" << endl;
+        else
+            cout << "NO" << endl;
+        return 0;
+    }
+    cout << "NO" << endl;
     return 0;
 }
 

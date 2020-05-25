@@ -1,6 +1,6 @@
 /*
    Created by Rahul Goel.
-*/
+   */
 /*******************************************************************************/
 #include <iostream>
 #include <vector>
@@ -63,125 +63,85 @@ T mod_prod(T a, Args... args) { return (a*mod_prod(args...))%mod; }
 /*******************************************************************************/
 
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
 
-vvi adj;
-vb vis;
-vi side;
-vpii divisions;
-vvi backtrack[2];
-
-void add_edge(ll u, ll v){
-    adj[u].pb(v);
-    adj[v].pb(u);
-}
-
-bool bipartite_check(){
-    ll n = adj.size();
-    queue < ll > q;
-    for(ll i=0; i<n; i++){
-        if(side[i] == -1){
-            backtrack[0].pb(vi());
-            backtrack[1].pb(vi());
-            q.push(i);
-            side[i] = 0;
-            while(!q.empty()){
-                ll v = q.front();
-                backtrack[side[v]].back().pb(v);
-                q.pop();
-                for(ll u : adj[v]){
-                    if(side[u] == -1){
-                        side[u] = side[v] ^ 1;
-                        q.push(u);
-                    }
-                    else if ((side[u] ^ side[v]) == 0)
-                        return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-pii dfs(ll v){
-    vis[v] = true;
-    ll p0 = 0, p1 = 0;
-    if(side[v] == 0)
-        p0++;
-    else
-        p1++;
-    for(ll u : adj[v]){
-        if(!vis[u]){
-            pii x = dfs(u);
-            p0 += x.ff, p1 += x.ss;
-        }
-    }
-    return {p0, p1};
-}
 
 ll solve(){
-    backtrack[0].clear(), backtrack[1].clear();
-    ll n, m, n1, n2, n3;
-    cin >> n >> m >> n1 >> n2 >> n3;
-    adj.resize(n), vis.resize(n, false), side.resize(n, -1);
-    for(ll i=0; i<m; i++){
-        ll u, v;
-        cin >> u >> v;
-        u--, v--;
-        add_edge(u, v);
+    ll n;
+    cin >> n;
+    set < pii > s, l, z;
+    ll neg = 0, mx = -LINF;
+    for(ll i=1; i<=n; i++){
+        ll x;
+        cin >> x;
+        s.insert({x, i});
+        if(x==0)
+            z.insert({x, i});
+        if(x<0)
+            l.insert({x, i}), neg++, mx = max(mx, x);
     }
 
-    if(!bipartite_check()){
-        cout << "NO" << endl;
-        return 0;
-    }
-    
-    for(ll i=0; i<n; i++){
-        if(!vis[i])
-            divisions.pb(dfs(i));
-    }
-    
-    vvi dp(divisions.size()+5, vi(n+5, -1));
-    dp[0][0] = 0;
-    for(ll i=0; i<divisions.size(); i++){
-        for(ll j=0; j<n; j++){
-            if(dp[i][j] != -1){
-                dp[i+1][j+divisions[i].ff] = 0;
-                dp[i+1][j+divisions[i].ss] = 1;
+    if(neg%2==1){
+        while(z.size()>1){
+            auto it1 = z.begin(), it2 = --z.end();
+            cout << 1 << " " << it1->ss << " " << it2->ss << endl;
+            s.erase(*it1);
+            z.erase(*it1);
+        }
+        if(s.size() <= 1)
+            return 0;
+        if(z.size()){
+            auto iz = z.begin(), il = --l.end();
+            cout << 1 << " " << iz->ss << " " << il->ss << endl;
+            s.erase(*iz);
+            z.erase(*iz);
+
+            if(s.size() == 1){
+                return 0;
             }
+
+            cout << 2 << " " << il->ss << endl;
+            s.erase(*il);
+            l.erase(*il);
+        }
+        else{
+            auto il = --l.end();
+            cout << 2 << " " << il->ss << endl;
+            s.erase(*il);
+            l.erase(*il);
+        }
+        if(s.size() <= 1)
+            return 0;
+        while(s.size()>1){
+            auto is1 = s.begin(), is2 = --s.end();
+            cout << 1 << " " << is1->ss << " " << is2->ss << endl;
+            s.erase(is1);
         }
     }
-
-    if(dp[divisions.size()][n2] == -1){
-        cout << "NO" << endl;
-        return 0;
-    }
-
-    cout << "YES" << endl;
-
-    vi ans(n+5);
-    ll cur = n2;
-    for(ll i=divisions.size(); i>0; i--){
-        for(auto it : backtrack[dp[i][cur]][i-1])
-            ans[it] = 2;
-        cur -= backtrack[dp[i][cur]][i-1].size();
-        if(cur == 0)
-            break;
-    }
-    for(ll i=0; i<n; i++){
-        if(ans[i] != 2){
-            if(n1>0)
-                ans[i] = 1, n1--;
-            else
-                ans[i] = 3;
+    else{
+        while(z.size()>1){
+            auto it1 = z.begin(), it2 = --z.end();
+            cout << 1 << " " << it1->ss << " " << it2->ss << endl;
+            s.erase(*it1);
+            z.erase(*it1);
+        }
+        if(s.size() <= 1)
+            return 0;
+        if(z.size()){
+            if(s.size() <= 1)
+                return 0;
+            auto iz = z.begin();
+            cout << 2 << " " << iz->ss << endl;
+            z.erase(*iz);
+            s.erase(*iz);
+        }
+        while(s.size()>1){
+            auto is1 = s.begin(), is2 = --s.end();
+            cout << 1 << " " << is1->ss << " " << is2->ss << endl;
+            s.erase(is1);
         }
     }
-
-    for(ll i=0; i<n; i++)
-        cout << ans[i];
-    cout << endl;
-
     return 0;
 }
 
