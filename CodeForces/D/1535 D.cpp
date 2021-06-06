@@ -1,6 +1,6 @@
 /*
-    Created by Rahul Goel.
-*/
+   Created by Rahul Goel.
+   */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -19,11 +19,11 @@ const ll LINF = 1e18;
 /*******************************************************************************/
 ll mod_sum() { return 0LL; }
 template < typename T, typename... Args >
-T mod_sum(T a, Args... args) { return ((a + MOD_sum(args...))%MOD + MOD)%MOD; }
+T mod_sum(T a, Args... args) { return ((a + mod_sum(args...))%MOD + MOD)%MOD; }
 /*******************************************************************************/
 ll mod_prod() { return 1LL; }
 template< typename T, typename... Args >
-T mod_prod(T a, Args... args) { return (a*MOD_prod(args...))%MOD; }
+T mod_prod(T a, Args... args) { return (a * mod_prod(args...))%MOD; }
 /*******************************************************************************/
 #ifdef ONLINE_JUDGE
 #define endl '\n'
@@ -49,38 +49,113 @@ using vvpii = vector < vector < pii > >;
 /*******************************************************************************/
 //.-.. . -. -.- .- .. ... .-.. --- ...- .
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
+
+ll find_sum(vector<ll> &sum, string &tree, ll i) {
+	if (i >= (ll) tree.size()) {
+		return 1;
+	} else {
+		ll ret = 0;
+		ll left = find_sum(sum, tree, 2 * i + 1);
+		ll right = find_sum(sum, tree, 2 * i + 2);
+		if (tree[i] == '?') ret = left + right;
+		if (tree[i] == '0') ret = left;
+		if (tree[i] == '1') ret = right;
+		return sum[i] = ret;
+	}
+}
+
+void update(vector<ll> &sum, string &tree, ll i, char upd) {
+	tree[i] = upd;
+	sum[i] = 0;
+	if (upd == '0') {
+		if (2 * i + 1 < (ll) tree.size()) sum[i] += sum[2 * i + 1];
+		else sum[i] += 1;
+	}
+	if (upd == '1') {
+		if (2 * i + 2 < (ll) tree.size()) sum[i] += sum[2 * i + 2];
+		else sum[i] += 1;
+	}
+	if (upd == '?') {
+		if (2 * i + 1 < (ll) tree.size()) sum[i] += sum[2 * i + 1];
+		else sum[i] += 1;
+		if (2 * i + 2 < (ll) tree.size()) sum[i] += sum[2 * i + 2];
+		else sum[i] += 1;
+	}
+
+	while (true) {
+		i = (i - 1) / 2;
+		if (tree[i] == '?') sum[i] = sum[2 * i + 1] + sum[2 * i + 2];
+		if (tree[i] == '0') sum[i] = sum[2 * i + 1];
+		if (tree[i] == '1') sum[i] = sum[2 * i + 2];
+
+		if (i == 0) break;
+	}
+}
 
 ll solve() {
-    ll n;
-    cin >> n;
-    vi vec(n);
-    for (ll &x : vec) {
-        cin >> x;
-    }
+	ll k;
+	cin >> k;
 
-    for (ll i = 1; i < n; i++) {
-        vec[i] += vec[i - 1];
-    }
+	string str;
+	cin >> str;
 
-    ll mn = 0, ans = vec.front();
-    for (ll i = 0; i < n; i++) {
-        ans = max(ans, vec[i] - mn);
-        mn = min(mn, vec[i]);
-    }
 
-    cout << ans << endl;
+	ll n = str.size();
+	string tree(n, '0');
+	vector<ll> idx(n);
 
-    return 0;
+	if (n == 1) {
+		ll q;
+		cin >> q;
+		while (q--) {
+			ll p;
+			char upd;
+			cin >> p >> upd;
+			if (upd == '?') cout << 2 << endl;
+			else cout << 1 << endl;
+		}
+		return 0;
+	}
+
+	ll x = n - 1, y = 0, z = 1;
+
+	while (x >= 0) {
+		for (ll i = x; i < x + z; i++) {
+			tree[y] = str[i];
+			idx[i] = y;
+			y++;
+		}
+		z *= 2;
+		x -= z;
+	}
+
+	vector<ll> sum(n);
+	find_sum(sum, tree, 0);
+
+	ll q;
+	cin >> q;
+
+	while (q--) {
+		ll p;
+		char upd;
+		cin >> p >> upd;
+		--p;
+		ll i = idx[p];
+		update(sum, tree, i, upd);
+		cout << sum.front() << endl;
+	}
+
+	return 0;
 }
 
 signed main() {
-    fastio;
+	fastio;
 
-    ll t = 1;
-    while (t--) {
-        solve();
-    }
-    return 0;
+	ll t = 1;
+	while (t--) {
+		solve();
+	}
+	return 0;
 }

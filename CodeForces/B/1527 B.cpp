@@ -1,6 +1,6 @@
 /*
-    Created by Rahul Goel.
-*/
+   Created by Rahul Goel.
+   */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -19,11 +19,11 @@ const ll LINF = 1e18;
 /*******************************************************************************/
 ll mod_sum() { return 0LL; }
 template < typename T, typename... Args >
-T mod_sum(T a, Args... args) { return ((a + MOD_sum(args...))%MOD + MOD)%MOD; }
+T mod_sum(T a, Args... args) { return ((a + mod_sum(args...))%MOD + MOD)%MOD; }
 /*******************************************************************************/
 ll mod_prod() { return 1LL; }
 template< typename T, typename... Args >
-T mod_prod(T a, Args... args) { return (a*MOD_prod(args...))%MOD; }
+T mod_prod(T a, Args... args) { return (a * mod_prod(args...))%MOD; }
 /*******************************************************************************/
 #ifdef ONLINE_JUDGE
 #define endl '\n'
@@ -49,38 +49,56 @@ using vvpii = vector < vector < pii > >;
 /*******************************************************************************/
 //.-.. . -. -.- .- .. ... .-.. --- ...- .
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
 
 ll solve() {
-    ll n;
-    cin >> n;
-    vi vec(n);
-    for (ll &x : vec) {
-        cin >> x;
-    }
+	ll n;
+	cin >> n;
+	string s;
+	cin >> s;
 
-    for (ll i = 1; i < n; i++) {
-        vec[i] += vec[i - 1];
-    }
+	string s_rev = s;
+	reverse(all(s_rev));
 
-    ll mn = 0, ans = vec.front();
-    for (ll i = 0; i < n; i++) {
-        ans = max(ans, vec[i] - mn);
-        mn = min(mn, vec[i]);
-    }
+	ll cnt_0 = count(all(s), '0');
+	ll cnt_1 = 0;
+	for (ll i = 0; i < n / 2; i++) {
+		if ((s[i] == '1' || s_rev[i] == '1') && s[i] != s_rev[i]) {
+			cnt_1++;
+		}
+	}
 
-    cout << ans << endl;
+	if (s == s_rev) {
+		if (cnt_0 == 1) {
+			cout << "BOB" << endl;
+			return 0;
+		} else if (cnt_0 & 1) {
+			cout << "ALICE" << endl;
+			return 0;
+		} else {
+			cout << "BOB" << endl;
+			return 0;
+		}
+	}
 
-    return 0;
+	if (cnt_0 == 2 and cnt_1 == 1) {
+		cout << "DRAW" << endl;
+		return 0;
+	} else {
+		cout << "ALICE" << endl;
+		return 0;
+	}
+	return 0;
 }
 
 signed main() {
-    fastio;
+	fastio;
 
-    ll t = 1;
-    while (t--) {
-        solve();
-    }
-    return 0;
+	ll t = 1;
+	cin >> t;
+	while (t--) {
+		solve();
+	}
+	return 0;
 }

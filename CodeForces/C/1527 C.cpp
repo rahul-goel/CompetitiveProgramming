@@ -1,6 +1,6 @@
 /*
-    Created by Rahul Goel.
-*/
+   Created by Rahul Goel.
+   */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -19,11 +19,11 @@ const ll LINF = 1e18;
 /*******************************************************************************/
 ll mod_sum() { return 0LL; }
 template < typename T, typename... Args >
-T mod_sum(T a, Args... args) { return ((a + MOD_sum(args...))%MOD + MOD)%MOD; }
+T mod_sum(T a, Args... args) { return ((a + mod_sum(args...))%MOD + MOD)%MOD; }
 /*******************************************************************************/
 ll mod_prod() { return 1LL; }
 template< typename T, typename... Args >
-T mod_prod(T a, Args... args) { return (a*MOD_prod(args...))%MOD; }
+T mod_prod(T a, Args... args) { return (a * mod_prod(args...))%MOD; }
 /*******************************************************************************/
 #ifdef ONLINE_JUDGE
 #define endl '\n'
@@ -49,38 +49,41 @@ using vvpii = vector < vector < pii > >;
 /*******************************************************************************/
 //.-.. . -. -.- .- .. ... .-.. --- ...- .
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
 
 ll solve() {
-    ll n;
-    cin >> n;
-    vi vec(n);
-    for (ll &x : vec) {
-        cin >> x;
-    }
+	ll n;
+	cin >> n;
 
-    for (ll i = 1; i < n; i++) {
-        vec[i] += vec[i - 1];
-    }
+	vi vec(n);
+	for (ll &x : vec) cin >> x;
 
-    ll mn = 0, ans = vec.front();
-    for (ll i = 0; i < n; i++) {
-        ans = max(ans, vec[i] - mn);
-        mn = min(mn, vec[i]);
-    }
+	vi dp(n);
+	dp.front() = 0;
+	map<ll,ll> mp;
+	mp[vec.front()] = 1;
 
-    cout << ans << endl;
+	ll sum = 0;
+	for (ll i = 1; i < n; i++) {
+		dp[i] = dp[i - 1];
+		dp[i] += mp[vec[i]];
+		mp[vec[i]] += i + 1;
+		sum += dp[i];
+	}
 
-    return 0;
+	cout << sum << endl;
+
+	return 0;
 }
 
 signed main() {
-    fastio;
+	fastio;
 
-    ll t = 1;
-    while (t--) {
-        solve();
-    }
-    return 0;
+	ll t = 1;
+	cin >> t;
+	while (t--) {
+		solve();
+	}
+	return 0;
 }

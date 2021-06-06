@@ -1,6 +1,6 @@
 /*
-    Created by Rahul Goel.
-*/
+   Created by Rahul Goel.
+   */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -19,14 +19,13 @@ const ll LINF = 1e18;
 /*******************************************************************************/
 ll mod_sum() { return 0LL; }
 template < typename T, typename... Args >
-T mod_sum(T a, Args... args) { return ((a + MOD_sum(args...))%MOD + MOD)%MOD; }
+T mod_sum(T a, Args... args) { return ((a + mod_sum(args...))%MOD + MOD)%MOD; }
 /*******************************************************************************/
 ll mod_prod() { return 1LL; }
 template< typename T, typename... Args >
-T mod_prod(T a, Args... args) { return (a*MOD_prod(args...))%MOD; }
+T mod_prod(T a, Args... args) { return (a * mod_prod(args...))%MOD; }
 /*******************************************************************************/
 #ifdef ONLINE_JUDGE
-#define endl '\n'
 #endif
 #define fastio          ios_base::sync_with_stdio(0); cin.tie(0); cout.tie(0)
 #define all(c)          (c).begin(), (c).end()
@@ -49,38 +48,71 @@ using vvpii = vector < vector < pii > >;
 /*******************************************************************************/
 //.-.. . -. -.- .- .. ... .-.. --- ...- .
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
+
+ll LOG = 20;
+vector<ll> a, c;
+vector<vector<ll>> p;
 
 ll solve() {
-    ll n;
-    cin >> n;
-    vi vec(n);
-    for (ll &x : vec) {
-        cin >> x;
-    }
 
-    for (ll i = 1; i < n; i++) {
-        vec[i] += vec[i - 1];
-    }
+	ll q;
+	cin >> q;
+	a.resize(q + 5), c.resize(q + 5);
+	p.resize(q + 5, vector<ll>(LOG, 0));
 
-    ll mn = 0, ans = vec.front();
-    for (ll i = 0; i < n; i++) {
-        ans = max(ans, vec[i] - mn);
-        mn = min(mn, vec[i]);
-    }
+	cin >> a[0] >> c[0];
 
-    cout << ans << endl;
+	for (ll i = 1; i <= q; i++) {
+		ll type;
+		cin >> type;
 
-    return 0;
+		if (type == 1) {
+			ll pi, ai, ci;
+			cin >> pi >> ai >> ci;
+			p[i][0] =  pi;
+			a[i] = ai;
+			c[i] = ci;
+
+			for (ll j = 1; j < LOG; j++) {
+				p[i][j] = p[p[i][j - 1]][j - 1];
+			}
+		} else {
+			ll vi, wi;
+			cin >> vi >> wi;
+
+			ll cnt = 0;
+			ll cost = 0;
+
+			while (wi > 0 and a[vi] > 0) {
+				ll u = vi;
+				for (ll lg = LOG - 1; lg >= 0; --lg) {
+					if (a[p[u][lg]] > 0) {
+						u = p[u][lg];
+					}
+				}
+				ll mn = min(a[u], wi);
+				a[u] -= mn;
+				wi -= mn;
+
+				cnt += mn;
+				cost += mn * c[u];
+			}
+
+			cout << cnt << " " << cost << endl;
+		}
+	}
+
+	return 0;
 }
 
 signed main() {
-    fastio;
+	fastio;
 
-    ll t = 1;
-    while (t--) {
-        solve();
-    }
-    return 0;
+	ll t = 1;
+	while (t--) {
+		solve();
+	}
+	return 0;
 }

@@ -1,6 +1,6 @@
 /*
-    Created by Rahul Goel.
-*/
+   Created by Rahul Goel.
+   */
 #include <bits/stdc++.h>
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -19,11 +19,11 @@ const ll LINF = 1e18;
 /*******************************************************************************/
 ll mod_sum() { return 0LL; }
 template < typename T, typename... Args >
-T mod_sum(T a, Args... args) { return ((a + MOD_sum(args...))%MOD + MOD)%MOD; }
+T mod_sum(T a, Args... args) { return ((a + mod_sum(args...))%MOD + MOD)%MOD; }
 /*******************************************************************************/
 ll mod_prod() { return 1LL; }
 template< typename T, typename... Args >
-T mod_prod(T a, Args... args) { return (a*MOD_prod(args...))%MOD; }
+T mod_prod(T a, Args... args) { return (a * mod_prod(args...))%MOD; }
 /*******************************************************************************/
 #ifdef ONLINE_JUDGE
 #define endl '\n'
@@ -49,38 +49,50 @@ using vvpii = vector < vector < pii > >;
 /*******************************************************************************/
 //.-.. . -. -.- .- .. ... .-.. --- ...- .
 /*
-    Code begins after this.
-*/
+   Code begins after this.
+   */
 
 ll solve() {
-    ll n;
-    cin >> n;
-    vi vec(n);
-    for (ll &x : vec) {
-        cin >> x;
-    }
+	string str;
+	cin >> str;
 
-    for (ll i = 1; i < n; i++) {
-        vec[i] += vec[i - 1];
-    }
+	ll n = str.size();
+	vector<array<ll, 2>> dp(n);
 
-    ll mn = 0, ans = vec.front();
-    for (ll i = 0; i < n; i++) {
-        ans = max(ans, vec[i] - mn);
-        mn = min(mn, vec[i]);
-    }
+	if (str.front() == '0') dp.front()[0] = 1;
+	else if (str.front() == '1') dp.front()[1] = 1;
+	else if (str.front() == '?') dp.front()[0] = dp.front()[1] = 1;
 
-    cout << ans << endl;
+	ll ans = 1;
 
-    return 0;
+	for (ll i = 1; i < n; i++) {
+		if (str[i] == '1') {
+			dp[i][0] = 0;
+			dp[i][1] = dp[i - 1][0] + 1;
+			ans += dp[i][1];
+		} else if (str[i] == '0') {
+			dp[i][1] = 0;
+			dp[i][0] = dp[i - 1][1] + 1;
+			ans += dp[i][0];
+		} else if (str[i] == '?') {
+			dp[i][0] = dp[i - 1][1] + 1;
+			dp[i][1] = dp[i - 1][0] + 1;
+			ans += max(dp[i][0], dp[i][1]);
+		}
+	}
+
+	cout << ans << endl;
+
+	return 0;
 }
 
 signed main() {
-    fastio;
+	fastio;
 
-    ll t = 1;
-    while (t--) {
-        solve();
-    }
-    return 0;
+	ll t = 1;
+	cin >> t;
+	while (t--) {
+		solve();
+	}
+	return 0;
 }
