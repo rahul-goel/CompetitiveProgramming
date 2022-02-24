@@ -52,92 +52,51 @@ using vvpii = vector < vector < pii > >;
    Code begins after this.
    */
 
-struct HeavyLightDecomposition {
-	vector<vector<ll>> adj;
-	vector<ll> sz, par, head, sc, st, en;
-	vector<ll> val, linear;
-	ll tiktok = 0;
+ll solve() {
+	ll n;
+	cin >> n;
 
-	void dfs_size(ll v, ll p) {
-		sz[v] = 1;
-		par[v] = p;
-		head[v] = v;
-		sc[v] = -1;
-		ll mx_sc_size = 0;
-		for (auto &u : adj[v]) {
-			if (u != p) {
-				dfs_size(u, v);
-				sz[v] += sz[u];
-				if (sz[u] > mx_sc_size) {
-					mx_sc_size = sz[u];
-					sc[v] = u;
-				}
+	vector<vector<array<ll, 2>>> adj(n);
+	for (ll i = 0; i < n - 1; i++) {
+		ll u, v, w;
+		cin >> u >> v >> w;
+		--u, --v;
+		adj[u].push_back({v, w});
+		adj[v].push_back({u, w});
+	}
+
+	ll root = 0;
+	queue<ll> q;
+	vector<bool> vis(n);
+	vector<ll> val(n);
+
+	vis[root] = true;
+	q.push(root);
+
+	while (!q.empty()) {
+		ll v = q.front();
+		q.pop();
+
+		for (auto ed : adj[v]) {
+			ll u = ed[0];
+			ll w = ed[1];
+			if (!vis[u]) {
+				vis[u] = true;
+				val[u] = val[v] xor w;
+				q.push(u);
 			}
 		}
 	}
 
-	void dfs_hld(ll v, ll p) {
-		st[v] = tiktok;
-		linear[tiktok] = val[v];
-		tiktok++;
-		// dfs on heavy edge
-		if (sc[v] != -1) {
-			head[sc[v]] = head[v];
-			dfs_hld(sc[v], v);
-		}
-		// dfs on light edges
-		for (auto &u : adj[v]) {
-			if (u != p and u != sc[v]) dfs_hld(u, v);
-		}
-		en[v] = tiktok;
-	}
-
-	bool is_ancestor(ll x, ll y) {
-		// is x ancestor of y ??
-		return st[x] <= st[y] and en[y] <= en[x];
-	}
-
-	ll find_lca(ll x, ll y) {
-		if (is_ancestor(x, y)) return x;
-		if (is_ancestor(y, x)) return y;
-
-		while (!is_ancestor(par[head[x]], y)) x = par[head[x]];
-		while (!is_ancestor(par[head[y]], x)) y = par[head[y]];
-		x = par[head[x]];
-		y = par[head[y]];
-
-		return is_ancestor(x, y) ? y : x;
-	}
-
-	HeavyLightDecomposition(vector<vector<ll>> &a_adj, vector<ll> &a_val) {
-		adj = a_adj;
-		val = a_val;
-		linear = st = en = sz = par = head = sc = vector<ll>(adj.size());
-		dfs_size(0, 0);
-		dfs_hld(0, 0);
-	}
-};
-
-// template for query from a node to lca
-// using range max query here with segment tree
-/*
-ll query_up(ll v, ll lca) {
 	ll ans = 0;
-	ll p = lca;
-	while (head[v] != head[p]) {
-		// segment tree is inclusive - [l, r]
-		// headnode to cur node for the chain
-		ans = max(ans, sgt.query(st[head[x]], st[x]));
-		x = par[head[x]];
+	for (ll i = 0; i < 60; i++) {
+		ll t[2] = {0};
+		for (ll &x : val) t[(x >> i) & 1ll]++;
+		ans += (1ll << i) % MOD * t[0] % MOD * t[1] % MOD;
+		ans %= MOD;
 	}
-	// final chain that involves lca (might not go till head)
-	ans = max(ans, sgt.query(st[lca], st[v]));
-	return ans;
-}
-*/
 
-ll solve() {
-
+	cout << ans << endl;
 	return 0;
 }
 
@@ -145,7 +104,6 @@ signed main() {
 	fastio;
 
 	ll t = 1;
-	cin >> t;
 	while (t--) {
 		solve();
 	}

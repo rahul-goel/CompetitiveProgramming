@@ -52,92 +52,103 @@ using vvpii = vector < vector < pii > >;
    Code begins after this.
    */
 
-struct HeavyLightDecomposition {
-	vector<vector<ll>> adj;
-	vector<ll> sz, par, head, sc, st, en;
-	vector<ll> val, linear;
-	ll tiktok = 0;
+struct SegmentTree {
+	struct node {
+		array<ll,40> arr = {0};
+		ll inv = 0;
+	};
 
-	void dfs_size(ll v, ll p) {
-		sz[v] = 1;
-		par[v] = p;
-		head[v] = v;
-		sc[v] = -1;
-		ll mx_sc_size = 0;
-		for (auto &u : adj[v]) {
-			if (u != p) {
-				dfs_size(u, v);
-				sz[v] += sz[u];
-				if (sz[u] > mx_sc_size) {
-					mx_sc_size = sz[u];
-					sc[v] = u;
-				}
-			}
+	vector<node> t;
+	ll n;
+
+	SegmentTree(ll n) {
+		this->n = n;
+		t.resize(n << 2);
+	}
+
+	node merge(node a, node b) {
+		node ret;
+		for (ll i = 0; i < (ll) a.arr.size(); i++) ret.arr[i] = a.arr[i] + b.arr[i];
+		for (ll i = 1; i < (ll) b.arr.size(); i++) b.arr[i] += b.arr[i - 1];
+		ret.inv = a.inv + b.inv;
+		for (ll i = 1; i < (ll) a.arr.size(); i++) ret.inv += a.arr[i] * b.arr[i - 1];
+		return ret;
+	}
+
+	void build(ll v, ll tl, ll tr, vector<ll> &vec) {
+		if (tl == tr) {
+			t[v].arr[vec[tl]] = 1;
+		} else {
+			ll tm = (tl + tr) >> 1;
+			build(v << 1, tl, tm, vec);
+			build(v << 1 | 1, tm + 1, tr, vec);
+			t[v] = merge(t[v << 1], t[v << 1 | 1]);
 		}
 	}
 
-	void dfs_hld(ll v, ll p) {
-		st[v] = tiktok;
-		linear[tiktok] = val[v];
-		tiktok++;
-		// dfs on heavy edge
-		if (sc[v] != -1) {
-			head[sc[v]] = head[v];
-			dfs_hld(sc[v], v);
+	void build(vector<ll> &vec) {
+		build(1, 0, n - 1, vec);
+	}
+
+	void update(ll v, ll tl, ll tr, ll pos, ll val) {
+		if (tl == tr) {
+			fill(all(t[v].arr), 0);
+			t[v].arr[val] = 1;
+		} else {
+			ll tm = (tl + tr) >> 1;
+			if (pos <= tm) update(v << 1, tl, tm, pos, val);
+			else update(v << 1 | 1, tm + 1, tr, pos, val);
+			t[v] = merge(t[v << 1], t[v << 1 | 1]);
 		}
-		// dfs on light edges
-		for (auto &u : adj[v]) {
-			if (u != p and u != sc[v]) dfs_hld(u, v);
+	}
+
+	void update(ll pos, ll val) {
+		update(1, 0, n - 1, pos, val);
+	}
+
+	node query(ll v, ll tl, ll tr, ll ql, ll qr) {
+		if (ql <= tl and tr <= qr) {
+			return t[v];
+		} else {
+			node ret;
+			ll tm = (tl + tr) >> 1;
+			if (ql <= tm) ret = merge(ret, query(v << 1, tl, tm, ql, qr));
+			if (tm + 1 <= qr) ret = merge(ret, query(v << 1 | 1, tm + 1, tr, ql, qr));
+			return ret;
 		}
-		en[v] = tiktok;
 	}
 
-	bool is_ancestor(ll x, ll y) {
-		// is x ancestor of y ??
-		return st[x] <= st[y] and en[y] <= en[x];
-	}
-
-	ll find_lca(ll x, ll y) {
-		if (is_ancestor(x, y)) return x;
-		if (is_ancestor(y, x)) return y;
-
-		while (!is_ancestor(par[head[x]], y)) x = par[head[x]];
-		while (!is_ancestor(par[head[y]], x)) y = par[head[y]];
-		x = par[head[x]];
-		y = par[head[y]];
-
-		return is_ancestor(x, y) ? y : x;
-	}
-
-	HeavyLightDecomposition(vector<vector<ll>> &a_adj, vector<ll> &a_val) {
-		adj = a_adj;
-		val = a_val;
-		linear = st = en = sz = par = head = sc = vector<ll>(adj.size());
-		dfs_size(0, 0);
-		dfs_hld(0, 0);
+	node query(ll ql, ll qr) {
+		return query(1, 0, n - 1, ql, qr);
 	}
 };
 
-// template for query from a node to lca
-// using range max query here with segment tree
-/*
-ll query_up(ll v, ll lca) {
-	ll ans = 0;
-	ll p = lca;
-	while (head[v] != head[p]) {
-		// segment tree is inclusive - [l, r]
-		// headnode to cur node for the chain
-		ans = max(ans, sgt.query(st[head[x]], st[x]));
-		x = par[head[x]];
-	}
-	// final chain that involves lca (might not go till head)
-	ans = max(ans, sgt.query(st[lca], st[v]));
-	return ans;
-}
-*/
-
 ll solve() {
+	ll n, q;
+	cin >> n >> q;
 
+	vector<ll> vec(n);
+	for (ll &x : vec) cin >> x, --x;
+
+	SegmentTree st(n);
+	st.build(vec);
+
+	while (q--) {
+		ll type;
+		cin >> type;
+		if (type == 1) {
+			ll ql, qr;
+			cin >> ql >> qr;
+			--ql, --qr;
+			ll ans = st.query(ql, qr).inv;
+			cout << ans << endl;
+		} else {
+			ll pos, val;
+			cin >> pos >> val;
+			--pos, --val;
+			st.update(pos, val);
+		}
+	}
 	return 0;
 }
 
@@ -145,7 +156,6 @@ signed main() {
 	fastio;
 
 	ll t = 1;
-	cin >> t;
 	while (t--) {
 		solve();
 	}

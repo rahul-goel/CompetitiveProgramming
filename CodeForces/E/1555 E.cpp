@@ -52,92 +52,95 @@ using vvpii = vector < vector < pii > >;
    Code begins after this.
    */
 
-struct HeavyLightDecomposition {
-	vector<vector<ll>> adj;
-	vector<ll> sz, par, head, sc, st, en;
-	vector<ll> val, linear;
-	ll tiktok = 0;
+struct SegmentTree {
+	vector<ll> t, lz;
+	ll n;
 
-	void dfs_size(ll v, ll p) {
-		sz[v] = 1;
-		par[v] = p;
-		head[v] = v;
-		sc[v] = -1;
-		ll mx_sc_size = 0;
-		for (auto &u : adj[v]) {
-			if (u != p) {
-				dfs_size(u, v);
-				sz[v] += sz[u];
-				if (sz[u] > mx_sc_size) {
-					mx_sc_size = sz[u];
-					sc[v] = u;
-				}
-			}
+	SegmentTree (ll an) {
+		n = an;
+		t.resize(n << 2);
+		lz.resize(n << 2);
+	}
+
+	void push(ll v) {
+		if (lz[v]) {
+			t[v << 1] += lz[v];
+			t[v << 1 | 1] += lz[v];
+			lz[v << 1] += lz[v];
+			lz[v << 1 | 1] += lz[v];
+			lz[v] = 0;
 		}
 	}
 
-	void dfs_hld(ll v, ll p) {
-		st[v] = tiktok;
-		linear[tiktok] = val[v];
-		tiktok++;
-		// dfs on heavy edge
-		if (sc[v] != -1) {
-			head[sc[v]] = head[v];
-			dfs_hld(sc[v], v);
+	void add(ll v, ll tl, ll tr, ll ql, ll qr, ll val) {
+		if (ql <= tl and tr <= qr) {
+			t[v] += val;
+			lz[v] += val;
+		} else {
+			push(v);
+			ll tm = (tl + tr) >> 1;
+			if (ql <= tm) add(v << 1, tl, tm, ql, qr, val);
+			if (tm + 1 <= qr) add(v << 1 | 1, tm + 1, tr, ql, qr, val);
+			t[v] = min(t[v << 1], t[v << 1 | 1]);
 		}
-		// dfs on light edges
-		for (auto &u : adj[v]) {
-			if (u != p and u != sc[v]) dfs_hld(u, v);
+	}
+
+	void add(ll ql, ll qr, ll val) {
+		add(1, 0, n - 1, ql, qr, val);
+	}
+
+	ll query(ll v, ll tl, ll tr, ll ql, ll qr) {
+		if (ql <= tl and tr <= qr) {
+			return t[v];
+		} else {
+			push(v);
+			ll tm = (tl + tr) >> 1;
+			ll ret = LINF;
+			if (ql <= tm) ret = min(ret, query(v << 1, tl, tm, ql, qr));
+			if (tm + 1 <= qr) ret = min(ret, query(v << 1 | 1, tm + 1, tr, ql, qr));
+			t[v] = min(t[v << 1], t[v << 1 | 1]);
+			return ret;
 		}
-		en[v] = tiktok;
 	}
 
-	bool is_ancestor(ll x, ll y) {
-		// is x ancestor of y ??
-		return st[x] <= st[y] and en[y] <= en[x];
-	}
-
-	ll find_lca(ll x, ll y) {
-		if (is_ancestor(x, y)) return x;
-		if (is_ancestor(y, x)) return y;
-
-		while (!is_ancestor(par[head[x]], y)) x = par[head[x]];
-		while (!is_ancestor(par[head[y]], x)) y = par[head[y]];
-		x = par[head[x]];
-		y = par[head[y]];
-
-		return is_ancestor(x, y) ? y : x;
-	}
-
-	HeavyLightDecomposition(vector<vector<ll>> &a_adj, vector<ll> &a_val) {
-		adj = a_adj;
-		val = a_val;
-		linear = st = en = sz = par = head = sc = vector<ll>(adj.size());
-		dfs_size(0, 0);
-		dfs_hld(0, 0);
+	ll query(ll ql, ll qr) {
+		return query(1, 0, n - 1, ql, qr);
 	}
 };
 
-// template for query from a node to lca
-// using range max query here with segment tree
-/*
-ll query_up(ll v, ll lca) {
-	ll ans = 0;
-	ll p = lca;
-	while (head[v] != head[p]) {
-		// segment tree is inclusive - [l, r]
-		// headnode to cur node for the chain
-		ans = max(ans, sgt.query(st[head[x]], st[x]));
-		x = par[head[x]];
-	}
-	// final chain that involves lca (might not go till head)
-	ans = max(ans, sgt.query(st[lca], st[v]));
-	return ans;
-}
-*/
+struct seg {
+	ll l, r, w;
+};
 
 ll solve() {
+	ll n, m;
+	cin >> n >> m;
 
+	vector<seg> vec(n);
+	for (auto &x : vec) {
+		cin >> x.l >> x.r >> x.w;
+		--x.l, --x.r;
+	}
+
+	sort(all(vec), [](const seg &a, const seg &b) {
+		return a.w < b.w;
+	});
+
+	ll ans = LINF;
+	SegmentTree st(m - 1);
+
+	for (ll i = 0, j = 0; i < n; i++) {
+		while (j < n and st.query(0, m - 2) == 0) {
+			st.add(vec[j].l, vec[j].r - 1, 1);
+			j++;
+		}
+
+		if (st.query(0, m - 2) == 0) break;
+		ans = min(ans, vec[j - 1].w - vec[i].w);
+		st.add(vec[i].l, vec[i].r - 1, -1);
+	}
+
+	cout << ans << endl;
 	return 0;
 }
 
@@ -145,7 +148,6 @@ signed main() {
 	fastio;
 
 	ll t = 1;
-	cin >> t;
 	while (t--) {
 		solve();
 	}
