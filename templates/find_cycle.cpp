@@ -23,7 +23,7 @@ struct CycleFind {
 		cycle_start = -1;
 
 		for (int v = 0; v < n; v++) {
-			if (color[v] == 0 && dfs(v))
+			if (color[v] == 0 && dfs(v, v))
 				break;
 		}
 
@@ -36,12 +36,13 @@ struct CycleFind {
 		}
 	}
 
-	bool dfs(int v) {
+	bool dfs(int v, int p) {
 		color[v] = 1;
 		for (int u : adj[v]) {
+			if (u == p) continue;
 			if (color[u] == 0) {
 				parent[u] = v;
-				if (dfs(u))
+				if (dfs(u, v))
 				return true;
 			} else if (color[u] == 1) {
 				cycle_end = v;
